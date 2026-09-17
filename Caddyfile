@@ -1,0 +1,11 @@
+{$DOMAIN} {
+	encode gzip
+
+	# Вебхук LINE и служебные ручки
+	reverse_proxy bot:8080
+
+	log {
+		output stdout
+		format console
+	}
+}
