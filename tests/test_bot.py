@@ -176,6 +176,15 @@ def test_prompts() -> None:
           "тем не присылали" in TODO_SYSTEM)
     check("/ask тоже сводит разные сообщения",
           "Своди данные из разных сообщений" in ASK_SYSTEM)
+    check("события с разными датами не склеиваются: TODO",
+          "РАЗНЫМИ датами" in TODO_SYSTEM)
+    check("события с разными датами не склеиваются: EVENTS",
+          "совпадение ДАТЫ" in EVENTS_SYSTEM)
+    check("разные испытания не путаются в /ask",
+          "Не путай разные испытания" in ASK_SYSTEM)
+    check("номера с решёткой не принимаются за даты",
+          all("не даты" in t or "а не даты" in t
+              for t in (TODO_SYSTEM, EVENTS_SYSTEM, ASK_SYSTEM)))
     check("запрет сваливать неделю экзаменов в строку",
           "ошибка" in EVENTS_SYSTEM)
 

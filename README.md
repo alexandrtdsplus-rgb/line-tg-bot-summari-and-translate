@@ -264,7 +264,7 @@ curl "https://bot.example.com/admin/summary?token=ВАШ_ADMIN_TOKEN&day=2026-09
 ## Тесты
 
 ```bash
-python3 tests/test_bot.py          # подпись, база, промпты — 58 проверок
+python3 tests/test_bot.py          # подпись, база, промпты — 62 проверки
 python3 tests/test_integration.py  # сквозной прогон вебхука — 33 проверки
 python3 tests/test_commands.py     # команды Telegram — 108 проверок
 ```
