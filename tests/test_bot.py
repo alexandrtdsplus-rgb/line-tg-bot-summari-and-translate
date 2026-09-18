@@ -135,6 +135,61 @@ def test_transcript() -> None:
     check("в полном логе есть перевод", "450 бат" in full)
 
 
+def test_prompts() -> None:
+    print("\nПравила в промптах")
+    from app.ai import (ASK_SYSTEM, EVENTS_SYSTEM, MONEY_SYSTEM, SUMMARY_SYSTEM,
+                        TODO_SYSTEM, TRANSLATE_SYSTEM)
+
+    fmt = dict(target="русский", today="2026-09-18", tomorrow="19.09")
+    for name, tpl in [("SUMMARY", SUMMARY_SYSTEM), ("TODO", TODO_SYSTEM),
+                      ("EVENTS", EVENTS_SYSTEM), ("MONEY", MONEY_SYSTEM),
+                      ("ASK", ASK_SYSTEM)]:
+        try:
+            tpl.format(**fmt)
+            ok = True
+        except (KeyError, IndexError):
+            ok = False
+        check(f"{name} форматируется без ошибок", ok)
+
+    check("справочные данные не сжимаются: SUMMARY",
+          "СПРАВОЧНЫЕ ДАННЫЕ" in SUMMARY_SYSTEM)
+    check("справочные данные не сжимаются: TODO",
+          "СПРАВОЧНЫЕ ДАННЫЕ" in TODO_SYSTEM)
+    check("справочные данные не сжимаются: EVENTS",
+          "СПРАВОЧНЫЕ ДАННЫЕ" in EVENTS_SYSTEM)
+    check("справочные данные не сжимаются: ASK",
+          "СПРАВОЧНЫЕ ДАННЫЕ" in ASK_SYSTEM)
+
+    check("номера страниц требуется сохранять",
+          "страниц" in TODO_SYSTEM and "ТОЧНО" in TODO_SYSTEM)
+    check("в /todo есть раздел про экзамены",
+          "К контрольным и экзаменам" in TODO_SYSTEM)
+    check("многодневные события разворачиваются по дням",
+          "разворачивай его" in EVENTS_SYSTEM)
+    check("в дне экзамена перечисляются предметы",
+          "перечисляй предметы этого дня" in EVENTS_SYSTEM)
+    check("расписание и темы сводятся вместе",
+          "Сведи их сам" in TODO_SYSTEM and "РАЗНЫМИ" in TODO_SYSTEM)
+    check("предметы сопоставляются по смыслу, а не дословно",
+          "Сопоставляй по смыслу" in TODO_SYSTEM)
+    check("предмет без тем не пропускается молча",
+          "тем не присылали" in TODO_SYSTEM)
+    check("/ask тоже сводит разные сообщения",
+          "Своди данные из разных сообщений" in ASK_SYSTEM)
+    check("запрет сваливать неделю экзаменов в строку",
+          "ошибка" in EVENTS_SYSTEM)
+
+    check("каждое срочное попадает в разделы с действиями",
+          "КАЖДОЕ сообщение, помеченное [СРОЧНОЕ]" in SUMMARY_SYSTEM)
+    check("запрет путать будущее с прошлым",
+          "Различай будущее и прошлое" in SUMMARY_SYSTEM)
+    check("markdown запрещён везде",
+          all("markdown" in t.lower() for t in
+              (SUMMARY_SYSTEM, TODO_SYSTEM, EVENTS_SYSTEM, MONEY_SYSTEM, ASK_SYSTEM)))
+    check("в переводчике описаны критерии срочности",
+          "Срочное =" in TRANSLATE_SYSTEM and "НЕ срочное" in TRANSLATE_SYSTEM)
+
+
 def test_mime_map() -> None:
     print("\nОпределение расширений вложений")
     check("jpeg → .jpg", EXT_BY_MIME["image/jpeg"] == ".jpg")
@@ -151,6 +206,7 @@ if __name__ == "__main__":
     test_db()
     test_telegram_helpers()
     test_transcript()
+    test_prompts()
     test_mime_map()
     print("\n" + "=" * 52)
     print(f"Пройдено: {PASSED}   Провалено: {FAILED}")
